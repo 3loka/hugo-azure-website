@@ -1,0 +1,27 @@
+# File: .github/workflows/seti[.yml  
+on:
+  push:
+    branches:
+      - main
+
+name: Setup Hugo with Azure Static Website
+
+jobs:
+
+  build-and-deploy:
+    runs-on: ubuntu-latest
+        
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Azure CLI script
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.0.72
+        inlineScript: |
+          az staticwebapp create -n ${{ secrets.STATIC_APP_NAME }} -g ${{ secrets.AZURE_RG }} -s https://github.com/${{ secrets.GITHUB_REPOSITORY }} -l eastus2 -b main -t ${{ secrets.PAT_TOKEN }}
