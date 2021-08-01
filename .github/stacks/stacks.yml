@@ -1,0 +1,109 @@
+name: hugo-stack-template
+description: This is a stack for deploying a Hugo based blog to Azure Static Websites.
+- Automated deployments with Cloud: "Offers a one-click configuration to deploy to Azure without manually managing tokens and secrets."
+- Codespaces: "A ready-to-go development container to use GitHub Codespaces."
+- Automated workflows with GitHub Actions: "Contains workflows typically used for CI/CD."
+branding:
+  icon: 'Azure.svg'
+  color: 'blue'
+#-------------------------------------------------------------
+
+ - name: hugo-azure-stack
+   default: hugo-azure-stack
+   description: Name of the new repo created from this stack
+ - name: Repo_Description
+   default: "This is a repo with a Hugo deployed in Azure Static Website"
+   description: Description of the new repo created from this stack
+ - name: Reviewer_Count
+   default: 2
+   description: Number of required reviewers for PR
+   validvalues:
+   - 2
+   - 3
+   - 4
+   - 5
+   - 6
+ - name: DEV_SPN_ID
+   description: SPN ID for Dev deployments
+ - name: STAGING_SPN_ID
+   description: SPN ID for STAGING deployments
+ - name: PROD_SPN_ID
+   description: SPN ID for Prod deployments
+ - name: MYSQL_Connection_String
+   description: DB credentials
+   is_secret: true
+ - name: Enable_Vulnerability_Alerts
+   description: Enable Vulnerability Alerts
+   type: boolean
+#-------------------------------------------------------------
+
+configs:
+# Meta data for creating the new repository
+- repo-metadata:
+  parameters:
+    name: {{ inputs.RepoName }}
+    description: {{ inputs.Repo_Description }}
+    secrets:
+      - name: DEV_SPN_ID
+        value: {{inputs.DEV_SPN_ID}}
+    topics:
+    - rails
+    - sql
+
+ # Branch protection rules
+ - branches:
+   - name: release_v? #branch name or pattern you want to protect
+     parameters:
+       enforce-admins: true
+       dismiss-stale-reviews: true
+       require-code-owner-reviews: true
+       required-approving-review-count: {{ inputs.Reviewer_Count }}
+       allow-force-pushes: false
+       allow-deletions: false
+
+   - name: dev_v? #branch name or pattern you want to protect
+     parameters:
+       enforce-admins: true
+       dismiss-stale-reviews: true
+       require-code-owner-reviews: true
+       required-approving-review-count: {{ inputs.Reviewer_Count }}
+       allow-force-pushes: false
+       allow-deletions: false
+
+ # Environments & variables(secrets) to be created
+ - environments:
+   - name: staging
+     parameters:
+      protected-branches: false
+      custom-branch-policies: true
+      secrets:
+        - name: Azure_SPN_ID
+          value: {{inputs.STAGING_SPN_ID}}
+        - name: MYSQL_Connection_String
+          value: {{inputs.MYSQL_Connection_String}}
+
+    - name: production
+      parameters:
+        protected-branches: true
+        custom-branch-policies: true
+        secrets:
+          - name: Azure_SPN_ID
+            value: {{inputs.PROD_SPN_ID}}
+          - name: SQL_Connection_String
+            value: {{inputs.SQL_Connection_String}}
+
+# Security and configuration settings to be enabled/disabled
+ - security:
+   parameters:
+     vulnerability-alerts: {{inputs.Enable_Vulnerability_Alerts}}
+     automated-security-fixes: true
+
+#-------------------------------------------------------------
+# GitHub Apps to be installed
+github-apps:
+- name: Azure
+
+#-------------------------------------------------------------
+# Initialization workflow to run
+init:
+ - uses: ".github/workflows/setup.yml"
