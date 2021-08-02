@@ -10,7 +10,7 @@
 This stack offers to create a static website using Hugo and deploy it to an Azure Static Web site. Static website do not have a data store associated to it. But there are some core functional pieces it needs, which the stack offers. 
 This stack leverages Github workflows to setup an end to end Build/Deploy CI/CD setup for you. It does so by creating a default action workflow and even runs it at the time of setting the stack. Just like any other stack, It is a guided experience and you dont have to write a single line of code to get started. 
 
-## **What** does it contain?
+## **What** does it use to build the website?
 
 ### Hugo
 
@@ -24,11 +24,11 @@ Hugo takes a directory with content and templates and renders them into a full H
 
 This stack uses [Static website hosting in Azure Storage](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website) to host the deployed website. 
 
-### Search
+### Blazor Search
 
 This stack builds a Search App and the Search Index, which is a [Blazor WebAssembly application](https://docs.microsoft.com/en-gb/aspnet/core/blazor/?view=aspnetcore-3.0)  and console application.
 
-### Updating Azure CDN
+### Azure CDN
 
 With this stack, latest website updates are uploaded to a Azure CDN. With this your website renders even faster !!
 
