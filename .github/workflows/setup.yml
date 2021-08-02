@@ -1,4 +1,4 @@
-# File: .github/workflows/seti[.yml  
+# File: .github/workflows/setup.yml  
 on:
   push:
     branches:
