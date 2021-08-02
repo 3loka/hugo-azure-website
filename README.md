@@ -12,11 +12,9 @@ This stack leverages Github workflows to setup an end to end Build/Deploy CI/CD 
 
 ### Hugo
 
-Hugo is a static HTML and CSS website generator written in [Go](https://golang.org/).
+[Hugo](https://gohugo.io) is a static HTML and CSS website generator written in [Go](https://golang.org/).
 It is optimized for speed, ease of use, and configurability.
 Hugo takes a directory with content and templates and renders them into a full HTML website.
-
-[Website](https://gohugo.io)
 
 ### Azure 
 
