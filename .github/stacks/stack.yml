@@ -1,109 +1,85 @@
-name: hugo-stack-template
-description: This is a stack for deploying a Hugo based blog to Azure Static Websites.
-- Automated deployments with Cloud: "Offers a one-click configuration to deploy to Azure without manually managing tokens and secrets."
-- Codespaces: "A ready-to-go development container to use GitHub Codespaces."
-- Automated workflows with GitHub Actions: "Contains workflows typically used for CI/CD."
-branding:
-  icon: 'Azure.svg'
-  color: 'blue'
-#-------------------------------------------------------------
+version: 1.0
 
- - name: hugo-azure-stack
-   default: hugo-azure-stack
-   description: Name of the new repo created from this stack
- - name: Repo_Description
-   default: "This is a repo with a Hugo deployed in Azure Static Website"
-   description: Description of the new repo created from this stack
- - name: Reviewer_Count
-   default: 2
-   description: Number of required reviewers for PR
-   validvalues:
-   - 2
-   - 3
-   - 4
-   - 5
-   - 6
- - name: DEV_SPN_ID
-   description: SPN ID for Dev deployments
- - name: STAGING_SPN_ID
-   description: SPN ID for STAGING deployments
- - name: PROD_SPN_ID
-   description: SPN ID for Prod deployments
- - name: MYSQL_Connection_String
-   description: DB credentials
-   is_secret: true
- - name: Enable_Vulnerability_Alerts
-   description: Enable Vulnerability Alerts
-   type: boolean
-#-------------------------------------------------------------
+name: nextjs-azure-appservice
+description: GH-stack for a nextjs app on azure appservice
+branding:
+  icon: 'azure.svg'
+  color: 'blue'
+ 
+inputs:
+  - name: NODE_VERSION
+    default: 'v12.22.4'
+    description: NODE_VERSION for nodejs stack
+    required: true
+    validvalues:
+    - 'v12.22.4'
+    - 'v14.17.4'
+
+  - name: NEXTJS_VERSION
+    default: 'v11.0.1'
+    description: NEXTJS_VERSION for nextjs stack
+    required: true
+    validvalues:
+    - v11.0.1
+    - v10.2.4
+    - v10.2.3
+    - v10.2.2
+    - v10.2.1
+
+  - name: NPM_PASSWORD
+    description: NPM_PASSWORD for dependabot workflow
+    required: true
+
+  - name: SENDGRID_API_KEY
+    description: SENDGRID_API_KEY for build notifications
+    required: true
+
+  - name: reviewer-count
+    default: 2
+    description: Number of required reviewers for PR
+
+  - name: enable-security-alerts
+    default: 'true'
+    description: Enable Security Alerts
+
+  - name: enable-vulnerability-alerts
+    default: 'true'
+    description: Enable Vulnerability Alerts
 
 configs:
-# Meta data for creating the new repository
-- repo-metadata:
-  parameters:
-    name: {{ inputs.RepoName }}
-    description: {{ inputs.Repo_Description }}
-    secrets:
-      - name: DEV_SPN_ID
-        value: {{inputs.DEV_SPN_ID}}
-    topics:
-    - rails
-    - sql
-
- # Branch protection rules
- - branches:
-   - name: release_v? #branch name or pattern you want to protect
-     parameters:
-       enforce-admins: true
-       dismiss-stale-reviews: true
-       require-code-owner-reviews: true
-       required-approving-review-count: {{ inputs.Reviewer_Count }}
-       allow-force-pushes: false
-       allow-deletions: false
-
-   - name: dev_v? #branch name or pattern you want to protect
-     parameters:
-       enforce-admins: true
-       dismiss-stale-reviews: true
-       require-code-owner-reviews: true
-       required-approving-review-count: {{ inputs.Reviewer_Count }}
-       allow-force-pushes: false
-       allow-deletions: false
-
- # Environments & variables(secrets) to be created
- - environments:
-   - name: staging
-     parameters:
-      protected-branches: false
-      custom-branch-policies: true
-      secrets:
-        - name: Azure_SPN_ID
-          value: {{inputs.STAGING_SPN_ID}}
-        - name: MYSQL_Connection_String
-          value: {{inputs.MYSQL_Connection_String}}
-
-    - name: production
+  - repo-metadata:
       parameters:
+        description: Created from 'nextjs-azure-appservice' stack
+        topics:
+        - 'nextjs'
+        - 'azure-appservice'
+
+  - branches:    
+    - name: dev*
+      parameters:
+        enforce-admins: false
+        dismiss-stale-reviews: true
+        require-code-owner-reviews: false
+        required-approving-review-count: 0
+        allow-force-pushes: true
+        allow-deletions: true
+
+  - environments: 
+    - name: development
+      parameters: 
         protected-branches: true
         custom-branch-policies: true
         secrets:
-          - name: Azure_SPN_ID
-            value: {{inputs.PROD_SPN_ID}}
-          - name: SQL_Connection_String
-            value: {{inputs.SQL_Connection_String}}
+          - name: NPM_PASSWORD
+            value: {{inputs.NPM_PASSWORD}}
 
-# Security and configuration settings to be enabled/disabled
- - security:
-   parameters:
-     vulnerability-alerts: {{inputs.Enable_Vulnerability_Alerts}}
-     automated-security-fixes: true
+          - name: SENDGRID_API_KEY
+            value: {{inputs.SENDGRID_API_KEY}}
 
-#-------------------------------------------------------------
-# GitHub Apps to be installed
-github-apps:
-- name: Azure
+  - security:
+      parameters: 
+        vulnerability-alerts: {{inputs.enable-vulnerability-alerts}}
+        automated-security-fixes: true
 
-#-------------------------------------------------------------
-# Initialization workflow to run
 init:
- - uses: ".github/workflows/setup.yml"
+- uses: ".github/workflows/stack-init.yaml"
